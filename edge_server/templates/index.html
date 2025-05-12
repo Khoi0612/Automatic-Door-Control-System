@@ -1,0 +1,296 @@
+<!doctype html>
+<html>
+
+<head>
+  <title>Door Logs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #17202a;
+      font-family: Helvetica, sans-serif;
+      color: #eaecee;
+      margin: 0;
+      padding: 0;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto auto;
+      gap: 20px;
+      padding: 20px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .date-input-area {
+      grid-column: 1;
+      grid-row: 2;
+      padding: 20px;
+      background-color: #2c3e50;
+      border-radius: 20px;
+    }
+
+    .date-input-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    .input-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-grow: 1;
+      width: 100%;
+    }
+
+    .date-input-form .input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .date-input-form label {
+      width: 100px;
+    }
+
+    .date-input-form input {
+      flex-grow: 1;
+      padding: 8px;
+      border-radius: 12px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .button-area {
+      grid-column: 1;
+      grid-row: 3;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #2c3e50;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-radius: 20px;
+    }
+
+    .log-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      padding: 20px;
+      background-color: #2c3e50;
+      grid-column: 1;
+      grid-row: 1;
+      text-align: center;
+      border-radius: 20px;
+    }
+
+    .log-item {
+      background: #17202a;
+      padding: 15px;
+      border-radius: 20px;
+      font-size: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 150px;
+    }
+
+    .button {
+      background-color: #ef5350;
+      border: none;
+      color: black;
+      padding: 10px;
+      text-align: center;
+      display: inline-block;
+      text-decoration: none;
+      font-size: 20px;
+      margin: 10px 0;
+      cursor: pointer;
+      border-radius: 20px;
+      min-width: 140px;
+      width: 100%;
+      max-width: 200px;
+      min-height: 140px;
+      height: 100%;
+      max-height: 200px;
+      font-weight: bold;
+      font-family: Helvetica, sans-serif;
+    }
+
+    .button:hover:not(.inactive) {
+      background-color: #b71c1c;
+      color: black;
+    }
+
+    .button.inactive {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .count-result {
+      font-weight: bold;
+      grid-column: 1;
+      grid-row: 4;
+      background-color: #2c3e50;
+      padding: 20px;
+      font-family: Helvetica, sans-serif;
+      border-radius: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="grid-container">
+
+    <!-- Log Area -->
+    <div class="log-container">
+      <div class="log-item">
+        <strong>Time:</strong>
+        <span id="time"></span>
+      </div>
+      <div class="log-item">
+        <strong>Distance:</strong>
+        <span id="distance"></span> cm
+      </div>
+      <div class="log-item">
+        <strong>Control:</strong>
+        <span id="control"></span>
+      </div>
+      <div class="log-item">
+        <strong>Light:</strong>
+        <span id="light"></span>
+      </div>
+      <div class="log-item">
+        <strong>Door:</strong>
+        <span id="door"></span>
+      </div>
+      <div class="log-item">
+        <strong>Alarm:</strong>
+        <span id="alarm"></span>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="date-input-area">
+      <form method="POST" class="date-input-form" id="countForm" action="/traffic" method="POST">
+        <div class="input-fields">
+          <div class="input-group">
+            <label>Start Time:</label>
+            <input type="datetime-local" name="start" required />
+          </div>
+          <div class="input-group">
+            <label>End Time:</label>
+            <input type="datetime-local" name="end" required />
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Button Panel Area -->
+    <div class="button-area">
+      <div style="display: flex; justify-content: center; width: 100%; max-width: 140px;">
+        <button type="submit" class="button" form="countForm">COUNT</button>
+      </div>
+      <form action="/manual-control" method="POST" style="margin: 0; display: flex; justify-content: center; width: 100%; max-width: 140px;">
+        <button type="submit" class="button" id="controlButton">MANUAL CONTROL</button>
+      </form>
+
+      <form action="/door-toggle" method="POST" style="margin: 0; display: flex; justify-content: center; width: 100%; max-width: 140px;">
+        <button type="submit" class="button" id="doorButton">OPEN DOOR</button>
+      </form>
+
+      <form action="/alarm-toggle" method="POST" style="margin: 0; display: flex; justify-content: center; width: 100%; max-width: 140px;">
+        <button type="submit" class="button" id="alarmButton">ENABLE ALARM</button>
+      </form>
+    </div>
+
+    <div class="count-result" id="countResultDiv" style="display: none;">
+      <h2>Customer Count: <span id="customerCount">0</span></h2>
+    </div>
+  </div>
+
+  <!-- Java Script -->
+  <script>
+    // Get the count parameter from URL
+    function getParameterByName(name, url = window.location.href) {
+      name = name.replace(/[\[\]]/g, '\\$&');
+      var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    // Update the count result from URL parameter
+    function updateCountResult() {
+      const count = getParameterByName('count');
+      if (count !== null) {
+        document.getElementById('customerCount').textContent = count;
+        document.getElementById('countResultDiv').style.display = 'block';
+      }
+    }
+    // Update button text based on current state
+    function updateButtonText(controlStatus, doorStatus, alarmStatus) {
+      const controlButton = document.getElementById('controlButton');
+      const doorButton = document.getElementById('doorButton');
+      const alarmButton = document.getElementById('alarmButton');
+      if (controlStatus === 'Auto') {
+        controlButton.textContent = 'MANUAL';
+        doorButton.classList.add('inactive');
+        alarmButton.classList.add('inactive');
+        doorButton.disabled = true;
+        alarmButton.disabled = true;
+      } else {
+        controlButton.textContent = 'AUTO';
+        doorButton.classList.remove('inactive');
+        alarmButton.classList.remove('inactive');
+        doorButton.disabled = false;
+        alarmButton.disabled = false;
+      }
+      if (doorStatus === 'Open') {
+        doorButton.textContent = 'CLOSE DOOR';
+      } else {
+        doorButton.textContent = 'OPEN DOOR';
+      }
+      if (alarmStatus === 'On') {
+        alarmButton.textContent = 'DISABLE ALARM';
+      } else {
+        alarmButton.textContent = 'ENABLE ALARM';
+      }
+    }
+    // Constantly update the log
+    function fetchLatestLog() {
+      fetch('/latest-log')
+        .then(response => response.json())
+        .then(data => {
+          if (data) {
+            document.getElementById('time').textContent = data.time;
+            document.getElementById('distance').textContent = data.distance;
+            document.getElementById('light').textContent = data.light;
+            document.getElementById('control').textContent = data.control;
+            document.getElementById('door').textContent = data.door;
+            document.getElementById('alarm').textContent = data.alarm;
+            // Update button text based on status
+            updateButtonText(data.control, data.door, data.alarm);
+          }
+        })
+        .catch(error => console.error('Error fetching log:', error));
+    }
+    // Run on page load
+    updateCountResult();
+    fetchLatestLog();
+    // Set interval for updates
+    setInterval(fetchLatestLog, 1000);
+  </script>
+</body>
+
+</html>
